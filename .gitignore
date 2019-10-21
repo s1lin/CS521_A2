@@ -338,3 +338,13 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/Temp
+/ProjectSettings
+/Library
+/README.txt
+/Goat.docx
+/CS521_A2.sln
+/COMP521A2ZainVirani260567997.sln
+/COMP521A2ZainVirani260567997.csproj
+/COMP521A2ZainVirani260567997-master.sln
+/Assembly-CSharp.csproj
