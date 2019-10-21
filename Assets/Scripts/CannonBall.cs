@@ -15,7 +15,7 @@ public class CannonBall : MonoBehaviour {
     private Vector2 nextPos;
 
     private float windSpeed;
-
+    private bool top = false;
 
     //collision handling
 
@@ -37,11 +37,13 @@ public class CannonBall : MonoBehaviour {
         posY = nextPosY;
         posX = nextPosX;
 
-        nextPos = new Vector2(nextPosX, nextPosY);
+        nextPos = new Vector2(nextPosX, +nextPosY);
 
         windSpeed = wind.WindSpeed();
-        Movement();
+        Movement();  
+    }
 
+    private void FixedUpdate() {
         if (IsOutOfBound(transform.position))
             Destroy(gameObject);
         if (IsLostKinetic())
@@ -57,7 +59,7 @@ public class CannonBall : MonoBehaviour {
         nextPosX -= vX;
         nextPosY += vY - gravity;
 
-        transform.position = Vector3.Lerp(transform.position, new Vector3(nextPosX, nextPosY, 0), 0.001f);
+        transform.position = Vector3.Lerp(transform.position, new Vector3(nextPosX, nextPosY, 0), 0.0001f);
     }
 
     private bool IsOutOfBound(Vector3 position) {
@@ -65,7 +67,7 @@ public class CannonBall : MonoBehaviour {
     }
 
     private bool IsLostKinetic() {
-        return vX < 0.0001f && vY < 0.0001f;
+        return false;
     }
 
     public void Bounce(Vector3 vertex, int i) {
@@ -75,12 +77,12 @@ public class CannonBall : MonoBehaviour {
         Vector3 vertexNom = vertex.normalized;
 
         //hit the top stone
-        if (i > 242) {
-            vX *= restitution;
-            vY = -vertexNom.y * vY * restitution;
+        if (i > 242 && i < 484 || top) {
+            //top = true;
+            vY = -vY * restitution * vertexNom.y * 1.5f;
             nextPosY = transform.position.y + vY;
-        } else if (i < 121) {//hit the right stone
-            vX = -vX * restitution;
+        } else {//hit the right stone
+            vX = -vX * restitution * 1.5f;
             vY = vertexNom.y * restitution;
             nextPosY = transform.position.y - vY;
         }
@@ -88,7 +90,7 @@ public class CannonBall : MonoBehaviour {
         nextPosX = transform.position.x - vX;
         
 
-        transform.position = Vector3.Lerp(transform.position, new Vector3(nextPosX, nextPosY, 0), 0.1f);
+        transform.position = Vector3.Lerp(transform.position, new Vector3(nextPosX, nextPosY, 0), 0.05f);
     }
 
 }

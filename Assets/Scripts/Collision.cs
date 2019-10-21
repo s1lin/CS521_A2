@@ -7,7 +7,7 @@ public class Collision : MonoBehaviour {
     private float ghostRadius = 0.35f;
     private List<GameObject> ghosts;
 
-    private float stoneRadius = 0.4f;
+    private float stoneRadius = 0.2f;
     private StoneHengeVertices stoneHengesVertices;
 
     private CannonBall connonBall;
@@ -27,16 +27,24 @@ public class Collision : MonoBehaviour {
     private void BallWithStones() {
 
         Vector3[] stoneHenges = stoneHengesVertices.AllVerrtices();
-
+        float distance = Vector3.Distance(transform.position, stoneHenges[0]);
+        float min = Vector3.Distance(transform.position, stoneHenges[0]);
+        int minIndex = 0;
         if (transform.position.x <= 17f && transform.position.x >= 11f) {
             for (int i = 0; i < stoneHenges.Length; i++) {
-                float distance = Vector3.Distance(transform.position, stoneHenges[i]);
+                distance = Vector3.Distance(transform.position, stoneHenges[i]);
                 if (distance < stoneRadius) {
-                    connonBall.Bounce(stoneHenges[i], i);
-                    print(i + " " + distance);
-                    //Debug.Break();
-                    break;
+                    if (min > distance) {
+                        min = distance;
+                        minIndex = i;
+                    }
+
                 }
+            }
+            if (min < stoneRadius) {
+                connonBall.Bounce(stoneHenges[minIndex], minIndex);
+                print(minIndex + " " + min);
+                //Debug.Break();
             }
         }
 

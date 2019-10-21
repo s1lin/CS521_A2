@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class StoneHenge : MonoBehaviour {
 
@@ -11,7 +13,7 @@ public class StoneHenge : MonoBehaviour {
         stoneMeshes = GetComponent<MeshFilter>().mesh;
         vertices = stoneMeshes.vertices;
 
-        StoneHengeGenerator(vertices, 0, 15);
+        StoneHengeGenerator(vertices);
 
         stoneMeshes.vertices = vertices;
         stoneMeshes.RecalculateBounds();
@@ -25,56 +27,51 @@ public class StoneHenge : MonoBehaviour {
         for (int i = 0; i < vertices.Length; i++) {
             Vector3 worldPt = transform.TransformPoint(stoneMeshes.vertices[i]);
             wolrdVertices[i] = worldPt;
-        }       
+        }
     }
 
     private float Interp(float t, float a, float b) {
         return (3 * Mathf.Pow(t, 2) + 2 * Mathf.Pow(t, 3)) * (b - a) + a;
     }
-    
-    void StoneHengeGenerator(Vector3[] vertices, int start, int end) {
-        
-        int mid = (end + start) / 2;
 
-        if (start != mid && end != mid) {
-
-            float maxOffset = Mathf.Abs(vertices[end].z - vertices[start].z);
-            float offset = (float)Random.Range(-maxOffset, maxOffset);
-            float noise = Mathf.PerlinNoise(vertices[end].z, 0.0f);
-            //float noise = Noise(vertices[start].z);
-            //print(noise);
-
-            vertices[mid].z += noise;
-
-            if (offset < 0) {
-                for (int i = mid + 11; i < this.vertices.Length; i++) {
-                    vertices[i].z += offset * noise;
-                }
-            }
-
-            if (start < mid) {
-                for (int i = mid - 1; i >= start; i--) {
-                    vertices[i].z += noise;
-                    if (offset < 0) {
-                        for (int j = i; j < this.vertices.Length; j += 11) {
-                            vertices[j].z += noise;
-                        }
-                    }
-                }
-                StoneHengeGenerator(vertices, start, mid);
-            }
-            if (mid < end) {
-                for (int i = mid + 1; i <= end; i++) {
-                    vertices[i].z += noise;
-                    if (offset < 0) {
-                        for (int j = i; j < this.vertices.Length; j += 11) {
-                            vertices[j].z += noise;
-                        }
-                    }
-                }
-                StoneHengeGenerator(vertices, mid, end);
-            }
+    void StoneHengeGenerator(Vector3[] vertices) {
+        float maxOffset = Mathf.Abs(vertices[30].z - Mathf.Abs(vertices[1].z));
+        for (int i = 0; i < vertices.Length; i++) {
+            float offset =  Random.Range(-maxOffset, maxOffset);
+            float noise = PerlinNoise(vertices[i].z);
+            vertices[i].z += offset * noise;
         }
+    }
+
+
+    float PerlinNoise(float x) {
+        int chunkSize = 16;
+        int range = 3;
+        float noise = 0;
+        
+        while (chunkSize > 0) {
+            int chunkIndex = (int) x / chunkSize;
+
+            float prog = (x % chunkSize) / (chunkSize * 1f);
+
+            float left_random = Random2(chunkIndex, range);
+            float right_random = Random2(chunkIndex + 1, range);
+
+
+            noise += (1 - prog) * left_random + prog * right_random;
+
+            chunkSize /= 2;
+            range /= 2;
+
+            range = Mathf.Max(1, range);
+        }
+
+        return (int)Mathf.Round(noise);
+
+    }
+
+    private int Random2(long x, int range) {
+        return (int)(((x + 1376312589L) ^ 5) % range);
     }
 
 }
