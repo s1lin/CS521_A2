@@ -12,12 +12,9 @@ public class CannonBall : MonoBehaviour {
 
     private float posX, posY;
     private float nextPosX, nextPosY;
-    private Vector2 nextPos;
 
     private float windSpeed;
     private bool top = false;
-
-    //collision handling
 
     private Wind wind;
 
@@ -36,8 +33,6 @@ public class CannonBall : MonoBehaviour {
     void Update() {
         posY = nextPosY;
         posX = nextPosX;
-
-        nextPos = new Vector2(nextPosX, +nextPosY);
 
         windSpeed = wind.WindSpeed();
         Movement();  
@@ -88,7 +83,6 @@ public class CannonBall : MonoBehaviour {
         }
 
         nextPosX = transform.position.x - vX;
-        
 
         transform.position = Vector3.Lerp(transform.position, new Vector3(nextPosX, nextPosY, 0), 0.05f);
     }

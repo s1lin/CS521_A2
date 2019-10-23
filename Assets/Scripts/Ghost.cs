@@ -6,18 +6,20 @@ public class Ghost : MonoBehaviour {
 
     private bool collision = false;
     private int numOfVertices = 15;
-    private int iterations = 12;
+    private int constraintIter = 12;
+    private float dt = 1e-05f;
 
     private Vector3 initV;
 
     private Transform ghostTransform;
     private Transform ghostBody;
     private Transform ghostHead;
-    private List<GameObject> verticesGO;
+
     private List<GhostNode> vertices;
+    private List<GameObject> verticesGO;
     private List<LineRenderer> ghostLines;
 
-    public List<GameObject> VerticesGO { get; }
+    public List<GhostNode> Vertices { get; }
     public int RootIndex { get; set; }
 
     void Start() {
@@ -38,7 +40,7 @@ public class Ghost : MonoBehaviour {
 
     void Update() {
 
-        float dt = Mathf.Pow(Time.deltaTime, 4);
+        
 
         //var mouse = Input.mousePosition;
         //var cam = Camera.main;
@@ -61,17 +63,20 @@ public class Ghost : MonoBehaviour {
     }
     private bool IsOutOfScence() {
         for (int i = 0; i < 15; i++) {
-            if (vertices[i].position.x > 35f || vertices[i].position.y > 23f)
+            if (vertices[i].position.x > 35f || vertices[i].position.y > 23f) {
+                Destroy(gameObject);
                 return true;
+            }
+                
         }
         return false;
     }
 
     private void BasicMovement(float dt) {
         if (!collision) {
-            vertices.ForEach(p => {
-                p.position += dt * initV;
-            });
+            for(int i = 0; i<vertices.Count; i++) {
+                vertices[i].position += dt * initV;
+            }
         } else {
             ApplyConstraints();
         }
@@ -84,7 +89,7 @@ public class Ghost : MonoBehaviour {
         collision = true;
     }
 
-    void BuildGhost() {
+    private void BuildGhost() {
         Transform t = ghostHead.Find("0");
         for (int i = 0; i < numOfVertices; i++) {
 
@@ -241,7 +246,7 @@ public class Ghost : MonoBehaviour {
             vertices[i].NextPosition();
         }
 
-        for (int iter = 0; iter < iterations; iter++) {
+        for (int iter = 0; iter < constraintIter; iter++) {
             for (int i = 0; i < vertices.Count; i++) {
                 GhostNode a = vertices[i];
                 for (int j = 0; j < a.Connection.Count; j++) {

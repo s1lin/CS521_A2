@@ -27,7 +27,7 @@ public class Cannon : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Space)) {
             Vector3 posistion = cannon.transform.Find("Frontmost").position;
-            GameObject cannonBallInstance = Instantiate(cannonBallPrefab, posistion, cannon.transform.localRotation, null) as GameObject;
+            Instantiate(cannonBallPrefab, posistion, cannon.transform.localRotation, null);
         }
 
 

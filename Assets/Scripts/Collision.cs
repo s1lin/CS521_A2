@@ -5,16 +5,16 @@ using UnityEngine;
 public class Collision : MonoBehaviour {
 
     private float ghostRadius = 0.35f;
-    private GameObject[] ghosts;
 
     private float stoneRadius = 0.2f;
     private StoneHengeVertices stoneHengesVertices;
 
     private CannonBall connonBall;
+    private GameManager game;
 
     void Start() {
         connonBall = GetComponent<CannonBall>();
-        ghosts = GameObject.FindGameObjectWithTag("game").GetComponent<GameManager>().ghostInstances;
+        game = GameObject.FindGameObjectWithTag("game").GetComponent<GameManager>();
         stoneHengesVertices = GameObject.FindGameObjectWithTag("stone").GetComponent<StoneHengeVertices>();
     }
 
@@ -49,13 +49,18 @@ public class Collision : MonoBehaviour {
     }
 
     private void BallWithGhosts() {
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("ghost");
+
         for (int index = 0; index < ghosts.Length; index++) {
             Ghost gCls = ghosts[index].GetComponent<Ghost>();
-            List<GameObject> vertices = gCls.VerticesGO;
+            List<GhostNode> vertices = gCls.Vertices;
+            print(vertices[0].position);
             for (int i = 0; i < vertices.Count; i++) {
+                print(vertices[i].position);
                 if (Vector3.Distance(
                     transform.position,
-                    transform.TransformPoint(vertices[i].transform.position)) <= Mathf.Abs(ghostRadius)) {
+                    transform.TransformPoint(vertices[i].position)) <= Mathf.Abs(ghostRadius)) {
                     gCls.BallCollision(i);
                     Destroy(gameObject);
                     return;

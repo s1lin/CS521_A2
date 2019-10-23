@@ -5,17 +5,17 @@ public class GhostNode {
     public List<GhostEdge> Connection { get; }
 
     public Vector3 position;
-    private Vector3 prev;
+    private Vector3 prePosition;
 
     public GhostNode(Vector3 p) {
-        position = prev = p;
+        position = prePosition = p;
         Connection = new List<GhostEdge>();
     }
 
     public void NextPosition() {
-        var v = position - prev;
-        var next = position + v;
-        prev = position;
+        Vector3 diff = position - prePosition;
+        Vector3 next = position + diff;
+        prePosition = position;
         position = next;
     }
 

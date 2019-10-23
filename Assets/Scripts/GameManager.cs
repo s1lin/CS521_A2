@@ -32,11 +32,11 @@ public class GameManager : MonoBehaviour {
     }
 
     public void RespawnGhost(int index) {
-        Destroy(ghostInstances[index]);
-
+        
         float initX = Random.Range(posX, posX + offset);
         float initY = Random.Range(posY, posY + offset);
 
         ghostInstances[index] = Instantiate(ghostPrefab, new Vector3(initX, initY, 0), transform.rotation, null) as GameObject;
+        ghostInstances[index].GetComponent<Ghost>().RootIndex = index;
     }
 }
