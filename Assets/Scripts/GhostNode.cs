@@ -1,21 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GhostNode {
-    public List<GhostEdge> Connection { get { return connection; } }
+    public List<GhostEdge> Connection { get; }
 
     public Vector3 position;
-    protected Vector3 prev;
-
-    List<GhostEdge> connection;
+    private Vector3 prev;
 
     public GhostNode(Vector3 p) {
         position = prev = p;
-        connection = new List<GhostEdge>();
+        Connection = new List<GhostEdge>();
     }
 
-    public void Step() {
+    public void NextPosition() {
         var v = position - prev;
         var next = position + v;
         prev = position;
@@ -23,7 +20,7 @@ public class GhostNode {
     }
 
     public void Connect(GhostEdge e) {
-        connection.Add(e);
+        Connection.Add(e);
     }
 
 }

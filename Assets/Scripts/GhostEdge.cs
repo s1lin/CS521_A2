@@ -1,32 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿public class GhostEdge {
+    public float Length { get; }
+    public bool IsConstraint { get; } = false;
 
+    private GhostNode a;
+    private GhostNode b;
 
-public class GhostEdge {
-    public float Length { get { return length; } }
-
-    GhostNode a, b;
-    float length;
-
-    public GhostEdge(GhostNode a, GhostNode b) {
+    public GhostEdge(GhostNode a, GhostNode b, bool isConstraint) {
         this.a = a;
         this.b = b;
-        this.length = (a.position - b.position).magnitude;
+        Length = (a.position - b.position).magnitude;
+        IsConstraint = isConstraint;
     }
 
-    public GhostEdge(GhostNode a, GhostNode b, float len) {
-        this.a = a;
-        this.b = b;
-        this.length = len;
+    //Find which Node does p connected to
+    public GhostNode ConnectedTo(GhostNode p) {
+        return a == p ? b : a;
     }
 
-    public GhostNode Other(GhostNode p) {
-        if (a == p) {
-            return b;
-        } else {
-            return a;
-        }
-    }
 }
-

@@ -5,7 +5,7 @@ using UnityEngine;
 public class Collision : MonoBehaviour {
 
     private float ghostRadius = 0.35f;
-    private List<GameObject> ghosts;
+    private GameObject[] ghosts;
 
     private float stoneRadius = 0.2f;
     private StoneHengeVertices stoneHengesVertices;
@@ -43,21 +43,19 @@ public class Collision : MonoBehaviour {
             }
             if (min < stoneRadius) {
                 connonBall.Bounce(stoneHenges[minIndex], minIndex);
-                print(minIndex + " " + min);
-                //Debug.Break();
             }
         }
 
     }
 
     private void BallWithGhosts() {
-
-        for (int index = 0; index < ghosts.Count; index++) {
-
+        for (int index = 0; index < ghosts.Length; index++) {
             Ghost gCls = ghosts[index].GetComponent<Ghost>();
-            Transform[] points = gCls.GhostVertices();
-            for (int i = 0; i < points.Length; i++) {
-                if (Vector3.Distance(transform.position, points[i].position) <= Mathf.Abs(ghostRadius)) {
+            List<GameObject> vertices = gCls.VerticesGO;
+            for (int i = 0; i < vertices.Count; i++) {
+                if (Vector3.Distance(
+                    transform.position,
+                    transform.TransformPoint(vertices[i].transform.position)) <= Mathf.Abs(ghostRadius)) {
                     gCls.BallCollision(i);
                     Destroy(gameObject);
                     return;
