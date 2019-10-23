@@ -18,6 +18,8 @@ public class CannonBall : MonoBehaviour {
 
     private Wind wind;
 
+    private int preI = 0;
+
     void Start() {
         nextPosX = transform.position.x;
         nextPosY = transform.position.y;
@@ -32,10 +34,10 @@ public class CannonBall : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         posY = nextPosY;
-        posX = nextPosX;        
+        posX = nextPosX;
 
         windSpeed = wind.WindSpeed();
-        Movement();  
+        Movement();
     }
 
     private void FixedUpdate() {
@@ -66,25 +68,31 @@ public class CannonBall : MonoBehaviour {
         return false;
     }
 
-    public void Bounce(Vector3 vertex, int i) {
+    public void Bounce(bool top, bool left, bool right) {
 
         restitution = Random.Range(0.5f, 0.95f);
         posX = nextPosX;
         posY = nextPosY;
-        Vector3 vertexNom = vertex.normalized;
 
+        if (top) {
         //hit the top stone
-        //if (i > 242 && i < 484 || top) {
-        //    //top = true;
-        //    vY = -vY * restitution * vertexNom.y * 1.5f;
-        //    nextPosY = transform.position.y + vY;
-        //} else {//hit the right stone
-        vX = -vX * restitution * 1.5f;
-        vY = vertexNom.y * restitution;
-        nextPosY = transform.position.y - vY;
-        //}
+            vX = restitution * (vX + 2f);
+            vY = restitution * vY;
+            nextPosY = transform.position.y - vY;
+            nextPosX = transform.position.x - vX;
 
-        nextPosX = transform.position.x - vX;
+        } else if(right) {//hit the right stone
+            vX = -vX * restitution * 1.5f;
+            vY = 0.15f * restitution;
+            nextPosY = transform.position.y - vY;
+            nextPosX = transform.position.x - vX;
+
+        } else if(left){
+            vX = vX * restitution + 0.5f;
+            vY = 0.15f * restitution;
+            nextPosY = transform.position.y - vY;
+            nextPosX = transform.position.x - vX;
+        }
 
         transform.position = Vector3.Lerp(transform.position, new Vector3(nextPosX, nextPosY, 0), 0.05f);
     }

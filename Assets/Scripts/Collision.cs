@@ -9,43 +9,32 @@ public class Collision : MonoBehaviour {
     private float stoneRadius = 1f;
 
     private CannonBall connonBall;
-    private Vector3[] stoneHengesVertices;
+    private StoneHengeVertices stoneHengesVertices;
 
-    public GameObject outter;
-    
     void Start() {
         connonBall = GetComponent<CannonBall>();
-        stoneHengesVertices = GameObject.FindGameObjectWithTag("stone").GetComponent<StoneHengeVertices>().AllVerrtices();
-        outter = GameObject.FindGameObjectWithTag("outter");
+        stoneHengesVertices = GameObject.FindGameObjectWithTag("stone").GetComponent<StoneHengeVertices>();
+        stoneHengesVertices.AllVerrtices();
     }
 
     // Update is called once per frame
     void Update() {
         BallWithStones();
         BallWithGhosts();
+        GhostsWithStone();
     }
 
     private void BallWithStones() {
 
-        Mesh outterMesh = outter.GetComponent<MeshFilter>().mesh;
-        Vector3[] outterVertices = outterMesh.vertices; 
+        float dTop = transform.position.y - stoneHengesVertices.topMost.y; 
+        float dRight = transform.position.x - stoneHengesVertices.rightMost.x;
 
-        float distance = Vector3.Distance(transform.position, stoneHengesVertices[0]);
-        float min = Vector3.Distance(transform.position, stoneHengesVertices[0]);
-        int minIndex = 0;
-        if (transform.position.x <= 19f && transform.position.x >= 11f) {
-            for (int i = 0; i < outterVertices.Length; i++) {
-                distance = Vector3.Distance(connonBall.transform.position, transform.TransformPoint(outterVertices[i]));
-                print(distance);
-                if (distance < 1f) {                    
-                    connonBall.Bounce(stoneHengesVertices[i], i);
-                    return;
-                }
-            }
-            //if (min < stoneRadius) {
-            //    print(min);
-            //    connonBall.Bounce(stoneHengesVertices[minIndex], minIndex);
-            //}
+        if (transform.position.x > 18.8f && dRight < 0.3f && transform.position.y < 8f) {
+            connonBall.Bounce(false, false, true);
+        }
+
+        if (transform.position.x <= 18.8f && dTop < 0.3f && transform.position.x >= 11f) {
+            connonBall.Bounce(true, false, false);
         }
 
     }
@@ -66,6 +55,42 @@ public class Collision : MonoBehaviour {
                         Destroy(gameObject);
                         return;
                     }
+                }
+            }
+        }
+    }
+
+    private void GhostsWithStone() {
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("ghost");
+        for (int index = 0; index < ghosts.Length; index++) {
+
+            Ghost gCls = ghosts[index].GetComponent<Ghost>();
+            List<GhostNode> vertices = gCls.vertices;
+            if (vertices != null) {
+                for (int i = 0; i < vertices.Count; i++) {
+                    Vector3 ghostP = vertices[i].position;
+
+                    if (ghostP.x <= 19f && ghostP.x >= 11f && ghostP.y < 8f) {
+
+                        float dTop = ghostP.y - stoneHengesVertices.topMost.y;
+                        float dLeft = ghostP.x - stoneHengesVertices.leftMost.x;
+                        float dRight = ghostP.x - stoneHengesVertices.rightMost.x;
+
+
+                        //if (dLeft < 0.5f) {
+                        //    gCls.StoneCollision(false, true, false);
+                        //}
+                        if (vertices[i].position.y > 8f && dTop < 0.5f) {
+                            print("here");
+                            gCls.StoneCollision(true, false, false);
+                        }
+                        //} else if(dRight < 1f) {
+                        //     gCls.StoneCollision(false, false, true);
+                        //}
+
+                    }
+
                 }
             }
         }

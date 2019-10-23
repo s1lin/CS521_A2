@@ -9,7 +9,8 @@ public class Ghost : MonoBehaviour {
     private int constraintIter = 12;
     private float dt = 1e-05f;
 
-    private Vector3 initV;
+    public Vector3 initV;
+    public bool left, top, right;
 
     private Transform ghostTransform;
     private Transform ghostBody;
@@ -18,9 +19,7 @@ public class Ghost : MonoBehaviour {
     public List<GhostNode> vertices;
     private List<GameObject> verticesGO;
     private List<LineRenderer> ghostLines;
-
-    private Vector3[] stoneHengesVertices;
-
+    
     public int RootIndex { get; set; }
 
     void Start() {
@@ -37,6 +36,7 @@ public class Ghost : MonoBehaviour {
 
         BuildGhost();
         LineDraw(true);
+
     }
 
     void Update() {
@@ -57,10 +57,21 @@ public class Ghost : MonoBehaviour {
         //2.Destroy out of Scene and Respawn
         if (IsOutOfScence())
             GameObject.FindGameObjectWithTag("game").GetComponent<GameManager>().RespawnGhost(RootIndex);
-      
+
 
     }
-
+    public void StoneCollision(bool t, bool l, bool r) {
+        this.top = t;
+        this.left = l;
+        this.right = t;
+        //if (left) {
+        //    for (int i = 0; i < vertices.Count; i++) { 
+        //        vertices[i].position.x = vertices[i].position.x;
+        //    }
+        //    ApplyConstraints();
+        //    UpdatePosition();
+        //}
+    }
     private void UpdatePosition() {
         for (int i = 0; i < numOfVertices; i++) {
             verticesGO[i].transform.position = vertices[i].position;
@@ -79,11 +90,30 @@ public class Ghost : MonoBehaviour {
     }
 
     private void BasicMovement(float dt) {
-        if (!collision) {
-            for (int i = 0; i < vertices.Count; i++) {
-                vertices[i].position += dt * initV;
+        if (!collision) {            
+            if(!left && !top && !right) {
+                for (int i = 0; i < vertices.Count; i++) {
+                    vertices[i].position += dt * initV;
+                }
             }
-        } 
+            if (left) {
+                for (int i = 0; i < vertices.Count; i++) { 
+                    vertices[i].position.x -= initV.x * Time.deltaTime;
+                }
+                left = false;
+            }
+            if (top) {
+                for (int i = 0; i < vertices.Count; i++) {
+                    vertices[i].position.y += initV.y * Time.deltaTime;
+                }
+                top = false;
+            }
+            if (right) {
+                for (int i = 0; i < vertices.Count; i++) {
+                    vertices[i].position += dt * initV;
+                }
+            }
+        }
     }
 
     //Do after ball hit the Ghost
@@ -163,6 +193,11 @@ public class Ghost : MonoBehaviour {
             if (i == 12) {
                 GhostNode b = vertices[0];
                 GhostEdge e = new GhostEdge(a, b, false);
+                a.Connect(e);
+                b.Connect(e);
+
+                b = vertices[2];
+                e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
             }
