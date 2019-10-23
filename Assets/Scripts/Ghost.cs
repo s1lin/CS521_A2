@@ -15,11 +15,12 @@ public class Ghost : MonoBehaviour {
     private Transform ghostBody;
     private Transform ghostHead;
 
-    private List<GhostNode> vertices;
+    public List<GhostNode> vertices;
     private List<GameObject> verticesGO;
     private List<LineRenderer> ghostLines;
 
-    public List<GhostNode> Vertices { get; }
+    private Vector3[] stoneHengesVertices;
+
     public int RootIndex { get; set; }
 
     void Start() {
@@ -40,107 +41,100 @@ public class Ghost : MonoBehaviour {
 
     void Update() {
 
-        
-
-        //var mouse = Input.mousePosition;
-        //var cam = Camera.main;
-        //var world = cam.ScreenToWorldPoint(new Vector3(mouse.x, mouse.y, cam.nearClipPlane + 30f));
+        //use for debug:
+        //Vector3 mouse = Input.mousePosition;
+        //Camera camera = Camera.main;
+        //Vector3 world = camera.ScreenToWorldPoint(new Vector3(mouse.x, mouse.y, cam.nearClipPlane + 30f));
         //vertices[8].position = ghostTransform.position = world;
 
         //1.Move to the right without going into the stonehenges
         BasicMovement(dt);
+        ApplyConstraints();
+        UpdatePosition();
+
+        LineDraw(false);
 
         //2.Destroy out of Scene and Respawn
         if (IsOutOfScence())
             GameObject.FindGameObjectWithTag("game").GetComponent<GameManager>().RespawnGhost(RootIndex);
+      
 
-        ApplyConstraints();
+    }
+
+    private void UpdatePosition() {
         for (int i = 0; i < numOfVertices; i++) {
             verticesGO[i].transform.position = vertices[i].position;
         }
-        LineDraw(false);
-
     }
+
     private bool IsOutOfScence() {
         for (int i = 0; i < 15; i++) {
-            if (vertices[i].position.x > 35f || vertices[i].position.y > 23f) {
+            if (transform.position.x > 35f || transform.position.x < -3f ||
+                    vertices[i].position.y > 24f || vertices[i].position.y < 1f) {
                 Destroy(gameObject);
                 return true;
             }
-                
         }
         return false;
     }
 
     private void BasicMovement(float dt) {
         if (!collision) {
-            for(int i = 0; i<vertices.Count; i++) {
+            for (int i = 0; i < vertices.Count; i++) {
                 vertices[i].position += dt * initV;
             }
-        } else {
-            ApplyConstraints();
-        }
+        } 
     }
 
-
-    public void BallCollision(int vertexIndex) {
-        float dt = Time.deltaTime;
-        vertices[vertexIndex].position -= dt * initV;
+    //Do after ball hit the Ghost
+    public void BallCollision(int vertexIndex, Vector3 vBall) {
+        vertices[vertexIndex].position -= vBall * Time.deltaTime * 0.5f;
+        UpdatePosition();
         collision = true;
     }
 
     private void BuildGhost() {
-        Transform t = ghostHead.Find("0");
+
+        //Iterate through all the vertices and add them to the vertices array
+        //vertice[] store GhostNode and the acutal GameObject is stored in verticesGO.
+        //See my documentation for the position of each vertices.
+        Transform t;
         for (int i = 0; i < numOfVertices; i++) {
 
-            if (i != 5 && i != 7 && i != 9)
-                t = ghostHead.Find(i.ToString());
-            else if (i < 13)
+            if (i == 5 || i == 7 || i == 9)
                 t = ghostBody.Find(i.ToString());
-
-            if (i == 13)
+            else if (i == 13)
                 t = ghostHead.Find("left_eye");
-            if (i == 14)
+            else if (i == 14)
                 t = ghostHead.Find("right_eye");
+            else
+                t = ghostHead.Find(i.ToString());
 
             vertices.Add(new GhostNode(t.position));
             verticesGO.Add(t.gameObject);
-        };
+        }
 
         for (int i = 0; i < numOfVertices; i++) {
-            var a = vertices[i];
-            if (i < 12) {
-                var b = vertices[i + 1];
-                var e = new GhostEdge(a, b, false);
-                a.Connect(e);
-                b.Connect(e);
-            }
-            if (i == 10) {
-                var b = vertices[8];
-                var e = new GhostEdge(a, b, true);
-                a.Connect(e);
-                b.Connect(e);
+            GhostNode a = vertices[i];
 
-                b = vertices[1];
-                e = new GhostEdge(a, b, true);
+            //Basic Shape of Ghost:
+            if (i < 12) {
+                GhostNode b = vertices[i + 1];
+                GhostEdge e = new GhostEdge(a, b, false);
                 a.Connect(e);
                 b.Connect(e);
             }
-            if (i == 5 || i == 7 || i == 9) {
-                var b = vertices[1];
-                var e = new GhostEdge(a, b, true);
-                a.Connect(e);
-                b.Connect(e);
-            }
+
+            //Additional Constraints:
             if (i == 4) {
-                var b = vertices[0];
-                var e = new GhostEdge(a, b, true);
+                GhostNode b = vertices[0];
+                GhostEdge e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
             }
             if (i == 6) {
-                var b = vertices[4];
-                var e = new GhostEdge(a, b, true);
+                GhostNode b = vertices[4];
+                GhostEdge e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
 
@@ -149,21 +143,32 @@ public class Ghost : MonoBehaviour {
                 a.Connect(e);
                 b.Connect(e);
             }
-
-            if (i == 12) {
-                var b = vertices[0];
-                var e = new GhostEdge(a, b, false);
+            if (i == 10) {
+                GhostNode b = vertices[8];
+                GhostEdge e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
 
-                b = vertices[2];
+                b = vertices[1];
                 e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
             }
+            if (i == 11) {
+                GhostNode b = vertices[3];
+                GhostEdge e = new GhostEdge(a, b, false);
+                a.Connect(e);
+                b.Connect(e);
+            }
+            if (i == 12) {
+                GhostNode b = vertices[0];
+                GhostEdge e = new GhostEdge(a, b, false);
+                a.Connect(e);
+                b.Connect(e);
+            }
             if (i == 13) {
-                var b = vertices[0];
-                var e = new GhostEdge(a, b, true);
+                GhostNode b = vertices[0];
+                GhostEdge e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
 
@@ -178,8 +183,8 @@ public class Ghost : MonoBehaviour {
                 b.Connect(e);
             }
             if (i == 14) {
-                var b = vertices[1];
-                var e = new GhostEdge(a, b, true);
+                GhostNode b = vertices[1];
+                GhostEdge e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
 
@@ -189,7 +194,6 @@ public class Ghost : MonoBehaviour {
                 b.Connect(e);
             }
         }
-
     }
 
     private void LineDraw(bool init) {

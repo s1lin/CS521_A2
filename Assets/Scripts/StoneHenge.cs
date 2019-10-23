@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class StoneHenge : MonoBehaviour {
 
-    private Mesh stoneMeshes;
+    private Mesh stoneMesh;
     private Vector3[] vertices;
     public Vector3[] wolrdVertices;
 
     void Start() {
 
-        stoneMeshes = GetComponent<MeshFilter>().mesh;
-        vertices = stoneMeshes.vertices;
+        stoneMesh = GetComponent<MeshFilter>().mesh;
+        vertices = stoneMesh.vertices;
 
         StoneHengeGenerator(vertices);
 
-        stoneMeshes.vertices = vertices;
-        stoneMeshes.RecalculateBounds();
-        stoneMeshes.RecalculateNormals();
+        stoneMesh.vertices = vertices;
+        stoneMesh.RecalculateBounds();
+        stoneMesh.RecalculateNormals();
 
         SaveWorldLocation();
     }
@@ -25,7 +25,7 @@ public class StoneHenge : MonoBehaviour {
     void SaveWorldLocation() {
         wolrdVertices = new Vector3[vertices.Length];
         for (int i = 0; i < vertices.Length; i++) {
-            Vector3 worldPt = transform.TransformPoint(stoneMeshes.vertices[i]);
+            Vector3 worldPt = transform.TransformPoint(stoneMesh.vertices[i]);
             wolrdVertices[i] = worldPt;
         }
     }

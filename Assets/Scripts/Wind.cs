@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Wind : MonoBehaviour {
-    
+
     public float maxSpeed = 2f;
     public GameObject cloudPrefab;
 
@@ -12,17 +12,26 @@ public class Wind : MonoBehaviour {
 
     void Start() {
         windSpeed = 0;
-        cloudInstance = new List<GameObject>();
 
-        for (int i = 0; i < 2; i++) {
-            Vector3 position = cloudPrefab.transform.position + new Vector3(i * 2, i * 3, 0);
+        //Generate Cloud at random position
+        cloudInstance = new List<GameObject>();
+        float x = cloudPrefab.transform.position.x;
+        float y = cloudPrefab.transform.position.y;
+
+        for (int i = 0; i < 4; i++) {
+
+            float initX = Random.Range(9f, 10f);
+            float initY = Random.Range(y - 1f, y + 1f);
+            Vector3 position = cloudPrefab.transform.position + new Vector3(initX * i, initY, 0);
             cloudInstance.Add(Instantiate(cloudPrefab, position, cloudPrefab.transform.rotation, null) as GameObject);
         }
-        InvokeRepeating("WindGenerator", 0f, 2f); //update every 2 seconds
+
+        //update speed of wind every 2 seconds
+        InvokeRepeating("WindGenerator", 0f, 2f);
     }
 
     void Update() {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 4; i++) {
             cloudInstance[i].transform.position += new Vector3(windSpeed * Time.deltaTime, 0, 0);
         }
     }
