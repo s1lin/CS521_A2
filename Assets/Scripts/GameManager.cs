@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour {
     public GameObject ghostPrefab;
     public GameObject[] ghostInstances;
 
-    private float posX = 1f;
+    private float posX = 0f;
     private float posY = 1f;
 
     private void Start() {

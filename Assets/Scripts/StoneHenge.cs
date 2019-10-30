@@ -30,10 +30,6 @@ public class StoneHenge : MonoBehaviour {
         }
     }
 
-    private float Interp(float t, float a, float b) {
-        return (3 * Mathf.Pow(t, 2) + 2 * Mathf.Pow(t, 3)) * (b - a) + a;
-    }
-
     void StoneHengeGenerator(Vector3[] vertices) {
         float maxOffset = Mathf.Abs(vertices[30].z - Mathf.Abs(vertices[1].z));
         for (int i = 0; i < vertices.Length; i++) {
@@ -45,7 +41,7 @@ public class StoneHenge : MonoBehaviour {
 
 
     float PerlinNoise(float x) {
-        int chunkSize = 16;
+        int chunkSize = 15;
         int range = 3;
         float noise = 0;
         

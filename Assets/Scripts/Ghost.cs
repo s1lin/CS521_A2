@@ -11,6 +11,7 @@ public class Ghost : MonoBehaviour {
 
     public Vector3 initV;
     public bool left, top, right;
+    public int lefti, topi, righti;
 
     private Transform ghostTransform;
     private Transform ghostBody;
@@ -19,11 +20,15 @@ public class Ghost : MonoBehaviour {
     public List<GhostNode> vertices;
     private List<GameObject> verticesGO;
     private List<LineRenderer> ghostLines;
-    
+
+    private StoneHengeVertices stoneHengesVertices;
+
     public int RootIndex { get; set; }
 
     void Start() {
-        initV = new Vector3(Mathf.Cos(Mathf.Deg2Rad) / Random.Range(1f, 2f),
+        stoneHengesVertices = GameObject.FindGameObjectWithTag("stone").GetComponent<StoneHengeVertices>();
+
+        initV = new Vector3(Mathf.Cos(Mathf.Deg2Rad) / Random.Range(2f, 3f),
             Mathf.Sin(Mathf.Deg2Rad) * Random.Range(20f, 30f), 0);
 
         ghostLines = new List<LineRenderer>();
@@ -47,8 +52,12 @@ public class Ghost : MonoBehaviour {
         //Vector3 world = camera.ScreenToWorldPoint(new Vector3(mouse.x, mouse.y, cam.nearClipPlane + 30f));
         //vertices[8].position = ghostTransform.position = world;
 
-        //1.Move to the right without going into the stonehenges
+        //1.Move to the right without going into the stonehenges       
         BasicMovement(dt);
+        ApplyConstraints();
+        UpdatePosition();
+
+        GhostsWithStone();
         ApplyConstraints();
         UpdatePosition();
 
@@ -58,20 +67,8 @@ public class Ghost : MonoBehaviour {
         if (IsOutOfScence())
             GameObject.FindGameObjectWithTag("game").GetComponent<GameManager>().RespawnGhost(RootIndex);
 
+    }
 
-    }
-    public void StoneCollision(bool t, bool l, bool r) {
-        this.top = t;
-        this.left = l;
-        this.right = t;
-        //if (left) {
-        //    for (int i = 0; i < vertices.Count; i++) { 
-        //        vertices[i].position.x = vertices[i].position.x;
-        //    }
-        //    ApplyConstraints();
-        //    UpdatePosition();
-        //}
-    }
     private void UpdatePosition() {
         for (int i = 0; i < numOfVertices; i++) {
             verticesGO[i].transform.position = vertices[i].position;
@@ -90,37 +87,69 @@ public class Ghost : MonoBehaviour {
     }
 
     private void BasicMovement(float dt) {
-        if (!collision) {            
-            if(!left && !top && !right) {
-                for (int i = 0; i < vertices.Count; i++) {
-                    vertices[i].position += dt * initV;
-                }
-            }
-            if (left) {
-                for (int i = 0; i < vertices.Count; i++) { 
-                    vertices[i].position.x -= initV.x * Time.deltaTime;
-                }
-                left = false;
-            }
-            if (top) {
-                for (int i = 0; i < vertices.Count; i++) {
-                    vertices[i].position.y += initV.y * Time.deltaTime;
-                }
-                top = false;
-            }
-            if (right) {
-                for (int i = 0; i < vertices.Count; i++) {
-                    vertices[i].position += dt * initV;
-                }
+                   
+        if(!left && !top && !right && !collision) {
+            for (int i = 0; i < vertices.Count; i++) {
+                vertices[i].position += dt * initV;
             }
         }
+        
+        
     }
 
     //Do after ball hit the Ghost
     public void BallCollision(int vertexIndex, Vector3 vBall) {
         vertices[vertexIndex].position -= vBall * Time.deltaTime * 0.5f;
         UpdatePosition();
+        GhostsWithStone();        
         collision = true;
+    }
+
+    private void GhostsWithStone() {
+        
+        float leftMostX = verticesGO[0].transform.position.x, 
+            rightMostX = 0f,            
+            bottomMostY = verticesGO[0].transform.position.y;
+        topi = 0;
+
+        for (int j = 0; j < verticesGO.Count; j++) {
+            Vector3 ghostP = verticesGO[j].transform.position;
+            
+            float dTop_2 = Mathf.Abs(ghostP.y - stoneHengesVertices.topMost.y);
+            float dLeft = Mathf.Abs(ghostP.x - stoneHengesVertices.leftMost.x);
+            float dRight = Mathf.Abs(ghostP.x - stoneHengesVertices.rightMost.x);
+
+            if (dLeft < 0.2f && stoneHengesVertices.topMost.y > ghostP.y) {
+                left = true;
+            }
+            if (ghostP.x < stoneHengesVertices.rightMost.x && 
+                ghostP.x > stoneHengesVertices.leftMost.x && 
+                dTop_2 < 0.2f) {
+                top = true;
+            }
+            if (dRight < 0.2f && stoneHengesVertices.topMost.y > ghostP.y) {
+                right = true;
+            }
+
+            if (left) {                
+                vertices[j].position.x -= initV.x * Time.deltaTime * 0.02f;
+                vertices[j].position.y += initV.y * Time.deltaTime * 0.02f;
+                
+                left = false;
+            }
+            if (top) {
+                vertices[j].position.y = stoneHengesVertices.topMost.y + 0.12f;                
+                top = false;
+            }
+            if (right) {
+                vertices[j].position.x += initV.x * Time.deltaTime * 0.02f;
+                right = false;
+            }
+        }
+
+      
+
+       
     }
 
     private void BuildGhost() {
@@ -172,6 +201,13 @@ public class Ghost : MonoBehaviour {
                 e = new GhostEdge(a, b, true);
                 a.Connect(e);
                 b.Connect(e);
+            }
+            if (i == 7) {
+                GhostNode b = vertices[1];
+                GhostEdge e = new GhostEdge(a, b, true);
+                a.Connect(e);
+                b.Connect(e);
+  
             }
             if (i == 10) {
                 GhostNode b = vertices[8];
@@ -299,6 +335,7 @@ public class Ghost : MonoBehaviour {
 
                     a.position -= f * 0.5f * delta;
                     b.position += f * 0.5f * delta;
+                   
                 }
             }
         }

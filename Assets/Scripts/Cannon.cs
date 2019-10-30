@@ -7,8 +7,7 @@ public class Cannon : MonoBehaviour {
     public GameObject cannonBallPrefab;
     public GameObject cannon;
 
-    private float cannonAngle;
-
+    private float cannonAngle; 
     void Update() {
 
         if (Input.GetKey(KeyCode.UpArrow)) {
